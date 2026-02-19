@@ -74,3 +74,20 @@ def create_tag(name: str = Form(...), db: Session = Depends(get_db)):
     db.add(tag)
     db.commit()
     return HTTPException(status_code=200, detail="Tag created")
+
+@router.get("/profile")
+def show_profile(request: Request):
+    user_data = {
+        "name": "Дар'я",
+        "email": "shubinad268@gmail.com",
+        "phone": "+380988749569",
+        "telegram": "qxwsvm", 
+        "bio": "Студентка ВНТУ, вивчаю системний аналіз. Захоплююся програмуванням, проєктуванням баз даних та створенням сучасних веб-додатків",
+        "role": "Системний аналітик",
+        "skills": ["Python", "SQL", "System Analysis", "FastAPI", "Git"]
+    }
+    
+    return templates.TemplateResponse(
+        "profile.html", 
+        {"request": request, "user": user_data}
+    )
