@@ -1,4 +1,5 @@
-from pydantic import BaseModel
+﻿from pydantic import BaseModel
+
 # Pydantic Schemas
 
 
@@ -18,3 +19,9 @@ class DetailCreate(BaseModel):
 
 class TagCreate(BaseModel):
     name: str
+
+
+class UserSubmission(BaseModel):
+    name: str
+    email: str
+    message: str

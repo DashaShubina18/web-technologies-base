@@ -1,12 +1,25 @@
 from fastapi import Depends, HTTPException, Request, Form, APIRouter
 from sqlalchemy.orm import Session
+from pydantic import BaseModel
 
 from src.config import templates
 from src.dependencies import get_db
 from src.models import User, Item, Tag, Detail
 
+from src.schemas import UserSubmission
+from src.services.form_handler import handle_submission
+
 router = APIRouter()
 
+USER_DATA = {
+    "name": "Дар'я",
+    "email": "shubinad268@gmail.com",
+    "phone": "+380988749569",
+    "telegram": "qxwsvm", 
+    "bio": "Студентка ВНТУ, вивчаю системний аналіз. Захоплююся програмуванням, проєктуванням баз даних та створенням сучасних веб-додатків",
+    "role": "Системний аналітик",
+    "skills": ["Python", "SQL", "System Analysis", "FastAPI", "Git"]
+}
 
 @router.get("/")
 def home(request: Request, db: Session = Depends(get_db)):
@@ -15,7 +28,6 @@ def home(request: Request, db: Session = Depends(get_db)):
         "users.html", {"request": request, "users": users}
     )
 
-
 @router.post("/users/create")
 def create_user(name: str = Form(...), db: Session = Depends(get_db)):
     user = User(name=name)
@@ -23,14 +35,12 @@ def create_user(name: str = Form(...), db: Session = Depends(get_db)):
     db.commit()
     return HTTPException(status_code=200, detail="User created")
 
-
 @router.get("/items")
 def list_items(request: Request, db: Session = Depends(get_db)):
     items = db.query(Item).all()
     return templates.TemplateResponse(
         "items.html", {"request": request, "items": items}
     )
-
 
 @router.post("/items/create")
 def create_item(
@@ -41,14 +51,12 @@ def create_item(
     db.commit()
     return HTTPException(status_code=200, detail="Item created")
 
-
 @router.get("/details")
 def list_details(request: Request, db: Session = Depends(get_db)):
     details = db.query(Detail).all()
     return templates.TemplateResponse(
         "details.html", {"request": request, "details": details}
     )
-
 
 @router.post("/details/create")
 def create_detail(
@@ -61,12 +69,10 @@ def create_detail(
     db.commit()
     return HTTPException(status_code=200, detail="Detail created")
 
-
 @router.get("/tags")
 def list_tags(request: Request, db: Session = Depends(get_db)):
     tags = db.query(Tag).all()
     return templates.TemplateResponse("tags.html", {"request": request, "tags": tags})
-
 
 @router.post("/tags/create")
 def create_tag(name: str = Form(...), db: Session = Depends(get_db)):
@@ -77,17 +83,25 @@ def create_tag(name: str = Form(...), db: Session = Depends(get_db)):
 
 @router.get("/profile")
 def show_profile(request: Request):
-    user_data = {
-        "name": "Дар'я",
-        "email": "shubinad268@gmail.com",
-        "phone": "+380988749569",
-        "telegram": "qxwsvm", 
-        "bio": "Студентка ВНТУ, вивчаю системний аналіз. Захоплююся програмуванням, проєктуванням баз даних та створенням сучасних веб-додатків",
-        "role": "Системний аналітик",
-        "skills": ["Python", "SQL", "System Analysis", "FastAPI", "Git"]
-    }
-    
     return templates.TemplateResponse(
         "profile.html", 
-        {"request": request, "user": user_data}
+        {"request": request, "user": USER_DATA}
     )
+class EmailRequest(BaseModel):
+    email: str
+@router.post("/api/message")
+async def handle_message(data: EmailRequest):
+    return {
+        "status": "success",
+        "message": f"Привіт, {USER_DATA['name']}! Твій email ({data.email}) успішно отримано сервером через Fetch API."
+    }
+
+@router.post("/api/submit")
+async def submit_form(data: UserSubmission):
+    result = handle_submission(data)
+
+    return {
+        "status": "success",
+        "data": data,
+        "result": result
+    }
