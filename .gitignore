@@ -13,3 +13,7 @@ instance/
 .mypy_cache/
 pytest_cache/
 __pypackages__/
+.venv/
+venv/
+__pycache__/
+*.pyc
