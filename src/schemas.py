@@ -5,6 +5,7 @@
 
 class UserCreate(BaseModel):
     name: str
+    password: str
 
 
 class ItemCreate(BaseModel):
